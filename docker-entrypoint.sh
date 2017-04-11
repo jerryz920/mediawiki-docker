@@ -99,7 +99,7 @@ if ($_ENV['MEDIAWIKI_DB_TYPE'] == 'mysql') {
 	$mysql = new mysqli($_ENV['MEDIAWIKI_DB_HOST'], $_ENV['MEDIAWIKI_DB_USER'], $_ENV['MEDIAWIKI_DB_PASSWORD'], '', (int) $_ENV['MEDIAWIKI_DB_PORT']);
 
 	if ($mysql->connect_error) {
-		file_put_contents('php://stderr', 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
+		file_put_contents('php://stderr', 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . " " . $_ENV['MEDIAWIKI_DB_PORT'] . "\n");
 		exit(1);
 	}
 
@@ -177,12 +177,18 @@ fi
 
 # If there is no LocalSettings.php, create one using maintenance/install.php
 if [ ! -e "LocalSettings.php" -a ! -z "$MEDIAWIKI_SITE_SERVER" ]; then
+
+	# ugly workaround...
+	if [ "$MEDIAWIKI_DB_TYPE" = "mysql" ]; then
+	  mydbhost="$MEDIAWIKI_DB_HOST:$MEDIAWIKI_DB_PORT"
+	  echo "maintaing workaround"
+	fi
 	php maintenance/install.php \
 		--confpath /var/www/html \
 		--dbname "$MEDIAWIKI_DB_NAME" \
 		--dbschema "$MEDIAWIKI_DB_SCHEMA" \
 		--dbport "$MEDIAWIKI_DB_PORT" \
-		--dbserver "$MEDIAWIKI_DB_HOST" \
+		--dbserver "$mydbhost" \
 		--dbtype "$MEDIAWIKI_DB_TYPE" \
 		--dbuser "$MEDIAWIKI_DB_USER" \
 		--dbpass "$MEDIAWIKI_DB_PASSWORD" \
