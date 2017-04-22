@@ -54,7 +54,9 @@ COPY apache/mediawiki.conf /etc/apache2/
 RUN echo "Include /etc/apache2/mediawiki.conf" >> /etc/apache2/apache2.conf
 
 COPY docker-entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\*:80/\*:1080/' /etc/apache2/sites-enabled/000-default.conf && \
+	sed -i 's/\*:80/\*:1080/' /etc/apache2/sites-available/000-default.conf
 
-EXPOSE 80 443
+EXPOSE 1080 10443
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apachectl", "-e", "info", "-D", "FOREGROUND"]
